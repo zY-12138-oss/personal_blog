@@ -4,13 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.blog.personal_blog.entity.Comment;
+import com.blog.personal_blog.entity.Like;
 import com.blog.personal_blog.entity.User;
 import com.blog.personal_blog.exception.BusinessException;
 import com.blog.personal_blog.mapper.CommentMapper;
+import com.blog.personal_blog.mapper.LikeMapper;
 import com.blog.personal_blog.service.CommentService;
 import com.blog.personal_blog.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +22,7 @@ import java.util.List;
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
 
     private final UserService userService;
+    private final LikeMapper likeMapper;
 
     @Override
     public List<Comment> getCommentsByArticleId(Long articleId) {
@@ -64,5 +68,57 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByDesc(Comment::getCreatedAt);
         return page(commentPage, wrapper);
+    }
+
+    @Override
+    @Transactional
+    public void likeComment(Long commentId, Long userId) {
+        LambdaQueryWrapper<Like> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Like::getUserId, userId)
+                .eq(Like::getTargetType, "comment")
+                .eq(Like::getTargetId, commentId);
+        
+        if (likeMapper.selectCount(wrapper) > 0) {
+            throw new BusinessException("已经点过赞了");
+        }
+        
+        Like like = new Like();
+        like.setUserId(userId);
+        like.setTargetType("comment");
+        like.setTargetId(commentId);
+        likeMapper.insert(like);
+        
+        Comment comment = getById(commentId);
+        comment.setLikes(comment.getLikes() + 1);
+        updateById(comment);
+    }
+
+    @Override
+    @Transactional
+    public void unlikeComment(Long commentId, Long userId) {
+        LambdaQueryWrapper<Like> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Like::getUserId, userId)
+                .eq(Like::getTargetType, "comment")
+                .eq(Like::getTargetId, commentId);
+        
+        Like like = likeMapper.selectOne(wrapper);
+        if (like == null) {
+            throw new BusinessException("还没有点赞");
+        }
+        
+        likeMapper.deleteById(like.getId());
+        
+        Comment comment = getById(commentId);
+        comment.setLikes(comment.getLikes() - 1);
+        updateById(comment);
+    }
+
+    @Override
+    public boolean hasLikedComment(Long commentId, Long userId) {
+        LambdaQueryWrapper<Like> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Like::getUserId, userId)
+                .eq(Like::getTargetType, "comment")
+                .eq(Like::getTargetId, commentId);
+        return likeMapper.selectCount(wrapper) > 0;
     }
 }

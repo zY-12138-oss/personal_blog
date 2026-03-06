@@ -14,32 +14,62 @@
           </div>
         </div>
       </el-header>
-      <el-main>
-        <el-card class="search-card">
-          <el-select v-model="selectedCategory" placeholder="选择分类" clearable @change="loadArticles">
-            <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
-          </el-select>
-        </el-card>
+      <el-main class="main-container">
+        <div class="content-wrapper">
+          <div class="main-content">
+            <el-card class="search-card">
+              <el-input
+                v-model="searchKeyword"
+                placeholder="搜索文章..."
+                clearable
+                @keyup.enter="handleSearch"
+                style="margin-right: 10px; flex: 1"
+              >
+                <template #append>
+                  <el-button icon="Search" @click="handleSearch">搜索</el-button>
+                </template>
+              </el-input>
+              <el-select v-model="selectedCategory" placeholder="选择分类" clearable @change="handleCategoryChange" style="width: 150px">
+                <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
+              </el-select>
+            </el-card>
 
-        <el-card v-for="article in articles" :key="article.id" class="article-card" @click="viewArticle(article.id)">
-          <h2 class="article-title">{{ article.title }}</h2>
-          <div class="article-meta">
-            <span>作者: {{ article.authorName }}</span>
-            <span v-if="article.categoryName">分类: {{ article.categoryName }}</span>
-            <span>浏览: {{ article.views }}</span>
-            <span>点赞: {{ article.likes }}</span>
-            <span>{{ formatDate(article.createdAt) }}</span>
+            <el-card v-for="article in articles" :key="article.id" class="article-card" @click="viewArticle(article.id)">
+              <h2 class="article-title">{{ article.title }}</h2>
+              <div class="article-meta">
+                <span>作者: {{ article.authorName }}</span>
+                <span v-if="article.categoryName">分类: {{ article.categoryName }}</span>
+                <span>浏览: {{ article.views }}</span>
+                <span>点赞: {{ article.likes }}</span>
+                <span>{{ formatDate(article.createdAt) }}</span>
+              </div>
+              <p class="article-summary">{{ article.summary }}</p>
+            </el-card>
+
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :total="total"
+              layout="total, prev, pager, next"
+              @current-change="handlePageChange"
+            />
           </div>
-          <p class="article-summary">{{ article.summary }}</p>
-        </el-card>
 
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="total"
-          layout="total, prev, pager, next"
-          @current-change="loadArticles"
-        />
+          <div class="sidebar">
+            <el-card class="hot-articles-card">
+              <template #header>
+                <div class="card-header">
+                  <span>🔥 热门文章</span>
+                </div>
+              </template>
+              <div v-for="(article, index) in hotArticles" :key="article.id" class="hot-article-item" @click="viewArticle(article.id)">
+                <span class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
+                <span class="hot-title">{{ article.title }}</span>
+              </div>
+              <el-empty v-if="hotArticles.length === 0" description="暂无热门文章" />
+            </el-card>
+          </div>
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -49,18 +79,21 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getArticleList } from '@/api/article'
+import { getArticleList, searchArticles, getHotArticles } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const articles = ref([])
+const hotArticles = ref([])
 const categories = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const selectedCategory = ref(null)
+const searchKeyword = ref('')
+const isSearching = ref(false)
 
 const loadArticles = async () => {
   try {
@@ -76,6 +109,51 @@ const loadArticles = async () => {
     total.value = res.data.total
   } catch (error) {
     console.error('加载文章失败', error)
+  }
+}
+
+const handleSearch = async () => {
+  currentPage.value = 1
+  if (!searchKeyword.value.trim()) {
+    isSearching.value = false
+    loadArticles()
+    return
+  }
+  isSearching.value = true
+  try {
+    const res = await searchArticles({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchKeyword.value
+    })
+    articles.value = res.data.records
+    total.value = res.data.total
+  } catch (error) {
+    console.error('搜索失败', error)
+  }
+}
+
+const handleCategoryChange = () => {
+  currentPage.value = 1
+  searchKeyword.value = ''
+  isSearching.value = false
+  loadArticles()
+}
+
+const handlePageChange = () => {
+  if (isSearching.value) {
+    handleSearch()
+  } else {
+    loadArticles()
+  }
+}
+
+const loadHotArticles = async () => {
+  try {
+    const res = await getHotArticles(10)
+    hotArticles.value = res.data
+  } catch (error) {
+    console.error('加载热门文章失败', error)
   }
 }
 
@@ -104,6 +182,7 @@ const formatDate = (dateStr) => {
 onMounted(() => {
   loadArticles()
   loadCategories()
+  loadHotArticles()
 })
 </script>
 
@@ -128,14 +207,34 @@ onMounted(() => {
   font-size: 24px;
 }
 
-.el-main {
-  max-width: 900px;
-  margin: 0 auto;
+.main-container {
   padding: 20px;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
 }
 
 .search-card {
   margin-bottom: 20px;
+}
+
+.search-card :deep(.el-card__body) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .article-card {
@@ -165,6 +264,71 @@ onMounted(() => {
 .article-summary {
   color: #606266;
   margin: 0;
+}
+
+.hot-articles-card {
+  position: sticky;
+  top: 20px;
+}
+
+.card-header {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.hot-article-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.hot-article-item:hover {
+  background-color: #f5f7fa;
+}
+
+.hot-article-item:last-child {
+  border-bottom: none;
+}
+
+.hot-rank {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  flex-shrink: 0;
+}
+
+.rank-1 {
+  background-color: #ff6b6b;
+}
+
+.rank-2 {
+  background-color: #ffa94d;
+}
+
+.rank-3 {
+  background-color: #ffd43b;
+}
+
+.hot-rank:not(.rank-1):not(.rank-2):not(.rank-3) {
+  background-color: #909399;
+}
+
+.hot-title {
+  font-size: 14px;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .el-pagination {

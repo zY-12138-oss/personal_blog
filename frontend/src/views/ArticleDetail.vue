@@ -14,7 +14,17 @@
             <span>作者: {{ article.authorName }}</span>
             <span v-if="article.categoryName">分类: {{ article.categoryName }}</span>
             <span>浏览: {{ article.views }}</span>
-            <span>点赞: {{ article.likes }}</span>
+            <span class="like-section">
+              <el-button 
+                :type="hasLiked ? 'danger' : 'primary'" 
+                :icon="hasLiked ? 'StarFilled' : 'Star'"
+                @click="handleLike"
+                :disabled="!userStore.token"
+                circle
+                size="small"
+              />
+              <span class="like-count">{{ article.likes }}</span>
+            </span>
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
           <div class="article-content" v-html="article.content"></div>
@@ -51,7 +61,18 @@
               </div>
               <div class="comment-content">{{ comment.content }}</div>
               <div class="comment-footer">
-                <span class="likes">👍 {{ comment.likes }}</span>
+                <span class="like-section">
+                  <el-button 
+                    :type="commentLikedMap.get(comment.id) ? 'danger' : 'default'" 
+                    :icon="commentLikedMap.get(comment.id) ? 'StarFilled' : 'Star'"
+                    @click="handleCommentLike(comment)"
+                    :disabled="!userStore.token"
+                    circle
+                    size="small"
+                    link
+                  />
+                  <span class="like-count">{{ comment.likes }}</span>
+                </span>
                 <el-button
                   v-if="userStore.token && comment.userId === currentUserId"
                   type="danger"
@@ -78,8 +99,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getArticle } from '@/api/article'
-import { getCommentsByArticle, createComment, deleteComment } from '@/api/comment'
+import { getArticle, likeArticle, unlikeArticle, hasLikedArticle } from '@/api/article'
+import { getCommentsByArticle, createComment, deleteComment, likeComment, unlikeComment, hasLikedComment } from '@/api/comment'
 import { useUserStore } from '@/stores/user'
 import { jwtDecode } from 'jwt-decode'
 
@@ -90,6 +111,8 @@ const article = ref(null)
 const comments = ref([])
 const newComment = ref('')
 const submitting = ref(false)
+const hasLiked = ref(false)
+const commentLikedMap = ref(new Map())
 
 const currentUserId = computed(() => {
   if (userStore.token) {
@@ -107,8 +130,42 @@ const loadArticle = async () => {
   try {
     const res = await getArticle(route.params.id)
     article.value = res.data
+    if (userStore.token) {
+      checkHasLiked()
+    }
   } catch (error) {
     console.error('加载文章失败', error)
+  }
+}
+
+const checkHasLiked = async () => {
+  try {
+    const res = await hasLikedArticle(route.params.id)
+    hasLiked.value = res.data
+  } catch (error) {
+    console.error('检查点赞状态失败', error)
+  }
+}
+
+const handleLike = async () => {
+  if (!userStore.token) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    if (hasLiked.value) {
+      await unlikeArticle(route.params.id)
+      hasLiked.value = false
+      article.value.likes--
+      ElMessage.success('取消点赞')
+    } else {
+      await likeArticle(route.params.id)
+      hasLiked.value = true
+      article.value.likes++
+      ElMessage.success('点赞成功')
+    }
+  } catch (error) {
+    console.error('点赞失败', error)
   }
 }
 
@@ -116,8 +173,46 @@ const loadComments = async () => {
   try {
     const res = await getCommentsByArticle(route.params.id)
     comments.value = res.data
+    if (userStore.token) {
+      checkAllCommentsLiked()
+    }
   } catch (error) {
     console.error('加载评论失败', error)
+  }
+}
+
+const checkAllCommentsLiked = async () => {
+  for (const comment of comments.value) {
+    try {
+      const res = await hasLikedComment(comment.id)
+      commentLikedMap.value.set(comment.id, res.data)
+    } catch (error) {
+      console.error('检查评论点赞状态失败', error)
+    }
+  }
+}
+
+const handleCommentLike = async (comment) => {
+  if (!userStore.token) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  const commentId = comment.id
+  const isLiked = commentLikedMap.value.get(commentId)
+  try {
+    if (isLiked) {
+      await unlikeComment(commentId)
+      commentLikedMap.value.set(commentId, false)
+      comment.likes--
+      ElMessage.success('取消点赞')
+    } else {
+      await likeComment(commentId)
+      commentLikedMap.value.set(commentId, true)
+      comment.likes++
+      ElMessage.success('点赞成功')
+    }
+  } catch (error) {
+    console.error('评论点赞失败', error)
   }
 }
 
@@ -216,6 +311,18 @@ onMounted(() => {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid #ebeef5;
+  align-items: center;
+}
+
+.like-section {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.like-count {
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .article-content {

@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/article")
 @RequiredArgsConstructor
@@ -25,6 +27,20 @@ public class ArticleController {
             @RequestParam(required = false) Long categoryId
     ) {
         return R.success(articleService.getArticleList(page, size, categoryId));
+    }
+
+    @GetMapping("/search")
+    public R<Page<Article>> searchArticles(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword
+    ) {
+        return R.success(articleService.searchArticles(page, size, keyword));
+    }
+
+    @GetMapping("/hot")
+    public R<List<Article>> getHotArticles(@RequestParam(defaultValue = "10") int limit) {
+        return R.success(articleService.getHotArticles(limit));
     }
 
     @GetMapping("/{id}")
@@ -66,6 +82,29 @@ public class ArticleController {
         Long authorId = getUserIdFromToken(httpRequest);
         articleService.deleteArticle(id, authorId);
         return R.success();
+    }
+
+    @PostMapping("/{id}/like")
+    public R<Void> likeArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        articleService.likeArticle(id, userId);
+        return R.success();
+    }
+
+    @DeleteMapping("/{id}/like")
+    public R<Void> unlikeArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        articleService.unlikeArticle(id, userId);
+        return R.success();
+    }
+
+    @GetMapping("/{id}/has-liked")
+    public R<Boolean> hasLikedArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.success(false);
+        }
+        return R.success(articleService.hasLikedArticle(id, userId));
     }
 
     private Long getUserIdFromToken(HttpServletRequest request) {

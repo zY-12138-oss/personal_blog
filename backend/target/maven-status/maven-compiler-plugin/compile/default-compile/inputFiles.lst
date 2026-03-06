@@ -6,6 +6,7 @@ D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\TagService
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Article.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Comment.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\AdminController.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Like.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\dto\LoginResponse.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\CommentServiceImpl.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\CommentService.java
@@ -19,7 +20,11 @@ D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Tag.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\CommentMapper.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\ArticleServiceImpl.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\CategoryServiceImpl.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\LikeMapper.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\TagServiceImpl.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\utils\XssUtil.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\config\CorsConfig.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\utils\PasswordGenerator.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\exception\GlobalExceptionHandler.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\CategoryController.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\CommentController.java

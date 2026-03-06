@@ -15,4 +15,10 @@ public interface CommentService extends IService<Comment> {
     void deleteComment(Long id, Long userId);
 
     Page<Comment> getAllComments(int page, int size);
+
+    void likeComment(Long commentId, Long userId);
+
+    void unlikeComment(Long commentId, Long userId);
+
+    boolean hasLikedComment(Long commentId, Long userId);
 }

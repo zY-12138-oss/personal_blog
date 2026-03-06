@@ -52,6 +52,29 @@ public class CommentController {
         return R.success(commentService.getAllComments(page, size));
     }
 
+    @PostMapping("/{id}/like")
+    public R<Void> likeComment(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        commentService.likeComment(id, userId);
+        return R.success();
+    }
+
+    @DeleteMapping("/{id}/like")
+    public R<Void> unlikeComment(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        commentService.unlikeComment(id, userId);
+        return R.success();
+    }
+
+    @GetMapping("/{id}/has-liked")
+    public R<Boolean> hasLikedComment(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.success(false);
+        }
+        return R.success(commentService.hasLikedComment(id, userId));
+    }
+
     private Long getUserIdFromToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

@@ -21,3 +21,24 @@ export const deleteComment = (id) => {
     method: 'delete'
   })
 }
+
+export const likeComment = (id) => {
+  return request({
+    url: `/comment/${id}/like`,
+    method: 'post'
+  })
+}
+
+export const unlikeComment = (id) => {
+  return request({
+    url: `/comment/${id}/like`,
+    method: 'delete'
+  })
+}
+
+export const hasLikedComment = (id) => {
+  return request({
+    url: `/comment/${id}/has-liked`,
+    method: 'get'
+  })
+}
