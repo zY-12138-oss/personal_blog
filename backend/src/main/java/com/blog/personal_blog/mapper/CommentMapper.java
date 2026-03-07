@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface CommentMapper extends BaseMapper<Comment> {
 
-    @Select("SELECT c.*, u.username as username " +
+    @Select("SELECT c.*, u.username as username, u.avatar as avatar " +
             "FROM comments c " +
             "LEFT JOIN users u ON c.user_id = u.id " +
             "WHERE c.article_id = #{articleId} AND c.status = 'approved' " +

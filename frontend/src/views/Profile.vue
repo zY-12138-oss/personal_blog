@@ -25,7 +25,22 @@
               <el-input v-model="userForm.bio" type="textarea" :rows="4" />
             </el-form-item>
             <el-form-item label="头像">
-              <el-input v-model="userForm.avatar" placeholder="头像 URL" />
+              <div class="avatar-section">
+                <el-avatar :size="100" :src="userForm.avatar">
+                  {{ userForm.username ? userForm.username.charAt(0).toUpperCase() : 'U' }}
+                </el-avatar>
+                <div class="avatar-upload">
+                  <input
+                    type="file"
+                    ref="avatarInput"
+                    @change="handleAvatarSelect"
+                    accept="image/*"
+                    style="display: none"
+                  />
+                  <el-button type="primary" :icon="Picture" @click="triggerAvatarUpload">上传头像</el-button>
+                  <el-input v-model="userForm.avatar" placeholder="或输入头像 URL" style="width: 300px; margin-top: 10px" />
+                </div>
+              </div>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleUpdate">保存修改</el-button>
@@ -41,9 +56,11 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Picture } from '@element-plus/icons-vue'
 import { jwtDecode } from 'jwt-decode'
 import { useUserStore } from '@/stores/user'
 import { getUserInfo, updateUserInfo } from '@/api/user'
+import { uploadFile } from '@/api/file'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -56,6 +73,7 @@ const userForm = reactive({
 })
 
 const userId = ref(null)
+const avatarInput = ref(null)
 
 const loadUserInfo = async () => {
   if (userStore.token) {
@@ -83,6 +101,41 @@ const handleUpdate = async () => {
   } catch (error) {
     console.error('更新失败', error)
   }
+}
+
+const triggerAvatarUpload = () => {
+  avatarInput.value.click()
+}
+
+const handleAvatarSelect = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('只能上传图片文件!')
+    return
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过 10MB!')
+    return
+  }
+
+  try {
+    const res = await uploadFile(file)
+    console.log('=== 上传响应 ===', res)
+    console.log('=== 图片URL ===', res.data.url)
+    
+    userForm.avatar = res.data.url
+    ElMessage.success('头像上传成功')
+    
+    console.log('=== userForm.avatar ===', userForm.avatar)
+  } catch (error) {
+    console.error('头像上传失败', error)
+    ElMessage.error('头像上传失败')
+  }
+
+  event.target.value = ''
 }
 
 onMounted(() => {
@@ -125,5 +178,15 @@ onMounted(() => {
 .card-header {
   font-weight: bold;
   font-size: 16px;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.avatar-upload {
+  flex: 1;
 }
 </style>

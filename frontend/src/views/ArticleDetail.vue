@@ -12,7 +12,6 @@
           <h1 class="article-title">{{ article.title }}</h1>
           <div class="article-meta">
             <span>作者: {{ article.authorName }}</span>
-            <span v-if="article.categoryName">分类: {{ article.categoryName }}</span>
             <span>浏览: {{ article.views }}</span>
             <span class="like-section">
               <el-button 
@@ -27,7 +26,7 @@
             </span>
             <span>{{ formatDate(article.createdAt) }}</span>
           </div>
-          <div class="article-content" v-html="article.content"></div>
+          <div class="article-content" v-html="renderContent(article.content)"></div>
         </el-card>
 
         <el-card class="comment-card">
@@ -55,7 +54,9 @@
           <div class="comment-list">
             <div v-for="comment in comments" :key="comment.id" class="comment-item">
               <div class="comment-user">
-                <el-avatar :size="32">{{ comment.username ? comment.username.charAt(0) : 'U' }}</el-avatar>
+                <el-avatar :size="32" :src="comment.avatar">
+                  {{ comment.username ? comment.username.charAt(0) : 'U' }}
+                </el-avatar>
                 <span class="username">{{ comment.username || '匿名用户' }}</span>
                 <span class="comment-time">{{ formatDate(comment.createdAt) }}</span>
               </div>
@@ -257,6 +258,20 @@ const handleDeleteComment = async (id) => {
 
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleString('zh-CN')
+}
+
+const renderContent = (content) => {
+  if (!content) return ''
+  
+  let html = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>')
+  
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; margin: 10px 0;" />')
+  
+  return html
 }
 
 onMounted(() => {

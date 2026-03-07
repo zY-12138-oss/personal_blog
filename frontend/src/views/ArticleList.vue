@@ -23,22 +23,17 @@
                 placeholder="搜索文章..."
                 clearable
                 @keyup.enter="handleSearch"
-                style="margin-right: 10px; flex: 1"
               >
                 <template #append>
                   <el-button icon="Search" @click="handleSearch">搜索</el-button>
                 </template>
               </el-input>
-              <el-select v-model="selectedCategory" placeholder="选择分类" clearable @change="handleCategoryChange" style="width: 150px">
-                <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
-              </el-select>
             </el-card>
 
             <el-card v-for="article in articles" :key="article.id" class="article-card" @click="viewArticle(article.id)">
               <h2 class="article-title">{{ article.title }}</h2>
               <div class="article-meta">
                 <span>作者: {{ article.authorName }}</span>
-                <span v-if="article.categoryName">分类: {{ article.categoryName }}</span>
                 <span>浏览: {{ article.views }}</span>
                 <span>点赞: {{ article.likes }}</span>
                 <span>{{ formatDate(article.createdAt) }}</span>
@@ -80,18 +75,15 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getArticleList, searchArticles, getHotArticles } from '@/api/article'
-import { getCategoryList } from '@/api/category'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const articles = ref([])
 const hotArticles = ref([])
-const categories = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
-const selectedCategory = ref(null)
 const searchKeyword = ref('')
 const isSearching = ref(false)
 
@@ -100,9 +92,6 @@ const loadArticles = async () => {
     const params = {
       page: currentPage.value,
       size: pageSize.value
-    }
-    if (selectedCategory.value) {
-      params.categoryId = selectedCategory.value
     }
     const res = await getArticleList(params)
     articles.value = res.data.records
@@ -133,13 +122,6 @@ const handleSearch = async () => {
   }
 }
 
-const handleCategoryChange = () => {
-  currentPage.value = 1
-  searchKeyword.value = ''
-  isSearching.value = false
-  loadArticles()
-}
-
 const handlePageChange = () => {
   if (isSearching.value) {
     handleSearch()
@@ -154,15 +136,6 @@ const loadHotArticles = async () => {
     hotArticles.value = res.data
   } catch (error) {
     console.error('加载热门文章失败', error)
-  }
-}
-
-const loadCategories = async () => {
-  try {
-    const res = await getCategoryList()
-    categories.value = res.data
-  } catch (error) {
-    console.error('加载分类失败', error)
   }
 }
 
@@ -181,7 +154,6 @@ const formatDate = (dateStr) => {
 
 onMounted(() => {
   loadArticles()
-  loadCategories()
   loadHotArticles()
 })
 </script>
@@ -231,11 +203,7 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.search-card :deep(.el-card__body) {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+
 
 .article-card {
   margin-bottom: 20px;

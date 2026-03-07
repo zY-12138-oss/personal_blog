@@ -16,16 +16,26 @@
           <el-form-item label="标题">
             <el-input v-model="articleForm.title" placeholder="请输入文章标题" />
           </el-form-item>
-          <el-form-item label="分类">
-            <el-select v-model="articleForm.categoryId" placeholder="请选择分类" clearable>
-              <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
-            </el-select>
-          </el-form-item>
+
           <el-form-item label="摘要">
             <el-input v-model="articleForm.summary" type="textarea" :rows="3" placeholder="请输入文章摘要" />
           </el-form-item>
           <el-form-item label="内容">
-            <el-input v-model="articleForm.content" type="textarea" :rows="15" placeholder="请输入文章内容" />
+            <div class="content-editor">
+              <div class="editor-toolbar">
+                <input
+                  type="file"
+                  ref="imageInput"
+                  @change="handleImageSelect"
+                  accept="image/*"
+                  style="display: none"
+                />
+                <el-button type="primary" :icon="Picture" @click="triggerImageUpload">上传图片</el-button>
+                <el-input v-model="imageUrl" placeholder="图片URL" style="width: 300px; margin-left: 10px" />
+                <el-button type="success" @click="insertImage" :icon="Check" style="margin-left: 10px">插入图片</el-button>
+              </div>
+              <el-input v-model="articleForm.content" type="textarea" :rows="15" placeholder="请输入文章内容，支持Markdown格式" />
+            </div>
           </el-form-item>
         </el-form>
       </el-main>
@@ -37,31 +47,24 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Picture, Check } from '@element-plus/icons-vue'
 import { createArticle, updateArticle, getArticle } from '@/api/article'
-import { getCategoryList } from '@/api/category'
+import { uploadFile } from '@/api/file'
 
 const router = useRouter()
 const route = useRoute()
 
 const isEdit = ref(false)
 const articleId = ref(null)
-const categories = ref([])
 
 const articleForm = reactive({
   title: '',
   content: '',
-  summary: '',
-  categoryId: null
+  summary: ''
 })
 
-const loadCategories = async () => {
-  try {
-    const res = await getCategoryList()
-    categories.value = res.data
-  } catch (error) {
-    console.error('加载分类失败', error)
-  }
-}
+const imageUrl = ref('')
+const imageInput = ref(null)
 
 const loadArticle = async (id) => {
   try {
@@ -69,7 +72,6 @@ const loadArticle = async (id) => {
     articleForm.title = res.data.title
     articleForm.content = res.data.content
     articleForm.summary = res.data.summary
-    articleForm.categoryId = res.data.categoryId
   } catch (error) {
     console.error('加载文章失败', error)
   }
@@ -99,8 +101,49 @@ const handleSave = async (status) => {
   }
 }
 
+const triggerImageUpload = () => {
+  imageInput.value.click()
+}
+
+const handleImageSelect = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('只能上传图片文件!')
+    return
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过 10MB!')
+    return
+  }
+
+  try {
+    const res = await uploadFile(file)
+    imageUrl.value = res.data.url
+    ElMessage.success('图片上传成功')
+  } catch (error) {
+    console.error('图片上传失败', error)
+    ElMessage.error('图片上传失败')
+  }
+
+  event.target.value = ''
+}
+
+const insertImage = () => {
+  if (!imageUrl.value) {
+    ElMessage.warning('请先上传图片或输入图片URL')
+    return
+  }
+  
+  const markdownImage = `![图片](${imageUrl.value})\n`
+  articleForm.content = articleForm.content + markdownImage
+  imageUrl.value = ''
+  ElMessage.success('图片已插入')
+}
+
 onMounted(() => {
-  loadCategories()
   if (route.params.id) {
     isEdit.value = true
     articleId.value = route.params.id
@@ -135,5 +178,18 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.content-editor {
+  width: 100%;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
 }
 </style>

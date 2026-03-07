@@ -45,6 +45,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             User user = userService.getById(userId);
             if (user != null) {
                 savedComment.setUsername(user.getUsername());
+                savedComment.setAvatar(user.getAvatar());
             }
         }
         return savedComment;
