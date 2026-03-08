@@ -1,4 +1,4 @@
-package com.blog.personal_blog.config;
+package com.blog.personal_blog.filter;
 
 import com.blog.personal_blog.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { isTokenExpired } from '@/utils/jwt'
 
 const routes = [
   {
@@ -81,6 +82,12 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
+  
+  if (userStore.token && isTokenExpired(userStore.token)) {
+    userStore.logout()
+    next('/login')
+    return
+  }
   
   if (to.meta.requiresAuth && !userStore.token) {
     next('/login')
