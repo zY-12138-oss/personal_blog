@@ -33,4 +33,7 @@ public class Comment {
 
     @TableField(exist = false)
     private String avatar;
+
+    @TableField(exist = false)
+    private String articleTitle;
 }

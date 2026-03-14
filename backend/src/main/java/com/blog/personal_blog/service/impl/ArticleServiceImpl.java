@@ -44,6 +44,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             User author = userService.getById(article.getAuthorId());
             if (author != null) {
                 article.setAuthorName(author.getUsername());
+                article.setAuthorAvatar(author.getAvatar());
             }
             if (article.getCategoryId() != null) {
                 Category category = categoryService.getById(article.getCategoryId());
@@ -78,6 +79,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             User author = userService.getById(article.getAuthorId());
             if (author != null) {
                 article.setAuthorName(author.getUsername());
+                article.setAuthorAvatar(author.getAvatar());
             }
             if (article.getCategoryId() != null) {
                 Category category = categoryService.getById(article.getCategoryId());
@@ -103,6 +105,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             User author = userService.getById(article.getAuthorId());
             if (author != null) {
                 article.setAuthorName(author.getUsername());
+                article.setAuthorAvatar(author.getAvatar());
             }
         }
         

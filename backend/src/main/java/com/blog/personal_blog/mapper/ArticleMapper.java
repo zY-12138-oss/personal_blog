@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
     
-    @Select("SELECT a.*, u.username as authorName, c.name as categoryName " +
+    @Select("SELECT a.*, u.username as authorName, u.avatar as authorAvatar, c.name as categoryName " +
             "FROM articles a " +
             "LEFT JOIN users u ON a.author_id = u.id " +
             "LEFT JOIN categories c ON a.category_id = c.id " +

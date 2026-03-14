@@ -51,6 +51,9 @@ public class ArticleController {
     @PostMapping
     public R<Article> createArticle(@RequestBody CreateArticleRequest request, HttpServletRequest httpRequest) {
         Long authorId = getUserIdFromToken(httpRequest);
+        if (authorId == null) {
+            return R.error("请先登录后再发布文章");
+        }
         Article article = articleService.createArticle(
                 authorId,
                 request.getTitle(),
@@ -65,6 +68,9 @@ public class ArticleController {
     @PutMapping("/{id}")
     public R<Article> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequest request, HttpServletRequest httpRequest) {
         Long authorId = getUserIdFromToken(httpRequest);
+        if (authorId == null) {
+            return R.error("请先登录后再编辑文章");
+        }
         Article article = articleService.updateArticle(
                 id,
                 authorId,
@@ -80,6 +86,9 @@ public class ArticleController {
     @DeleteMapping("/{id}")
     public R<Void> deleteArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long authorId = getUserIdFromToken(httpRequest);
+        if (authorId == null) {
+            return R.error("请先登录后再删除文章");
+        }
         articleService.deleteArticle(id, authorId);
         return R.success();
     }
@@ -87,6 +96,9 @@ public class ArticleController {
     @PostMapping("/{id}/like")
     public R<Void> likeArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再点赞");
+        }
         articleService.likeArticle(id, userId);
         return R.success();
     }
@@ -94,6 +106,9 @@ public class ArticleController {
     @DeleteMapping("/{id}/like")
     public R<Void> unlikeArticle(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再取消点赞");
+        }
         articleService.unlikeArticle(id, userId);
         return R.success();
     }

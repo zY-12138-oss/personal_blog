@@ -28,6 +28,9 @@ public class CommentController {
     @PostMapping
     public R<Comment> createComment(@RequestBody CreateCommentRequest request, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再发表评论");
+        }
         Comment comment = commentService.createComment(
                 request.getArticleId(),
                 userId,
@@ -40,6 +43,9 @@ public class CommentController {
     @DeleteMapping("/{id}")
     public R<Void> deleteComment(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再删除评论");
+        }
         commentService.deleteComment(id, userId);
         return R.success();
     }
@@ -55,6 +61,9 @@ public class CommentController {
     @PostMapping("/{id}/like")
     public R<Void> likeComment(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再点赞");
+        }
         commentService.likeComment(id, userId);
         return R.success();
     }
@@ -62,6 +71,9 @@ public class CommentController {
     @DeleteMapping("/{id}/like")
     public R<Void> unlikeComment(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            return R.error("请先登录后再取消点赞");
+        }
         commentService.unlikeComment(id, userId);
         return R.success();
     }

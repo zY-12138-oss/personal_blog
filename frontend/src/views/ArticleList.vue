@@ -5,12 +5,26 @@
         <div class="header-content">
           <h1 @click="$router.push('/')" style="cursor: pointer">个人博客</h1>
           <div class="nav-buttons">
-            <el-button v-if="userStore.token && userStore.role === 'ADMIN'" @click="$router.push('/admin/dashboard')">管理后台</el-button>
-            <el-button v-if="userStore.token" @click="$router.push('/profile')">个人中心</el-button>
-            <el-button v-if="userStore.token" type="primary" @click="$router.push('/article/edit')">写文章</el-button>
-            <el-button v-if="!userStore.token" @click="$router.push('/login')">登录</el-button>
-            <el-button v-if="!userStore.token" type="primary" @click="$router.push('/register')">注册</el-button>
-            <el-button v-else @click="handleLogout">退出登录</el-button>
+            <template v-if="userStore.token">
+              <el-button v-if="userStore.role === 'ADMIN'" class="btn-desktop" @click="$router.push('/admin/dashboard')">管理后台</el-button>
+              <el-button v-if="userStore.role === 'ADMIN'" class="btn-mobile" circle :icon="Setting" @click="$router.push('/admin/dashboard')" />
+              
+              <el-button class="btn-desktop" @click="$router.push('/profile')">个人中心</el-button>
+              <el-button class="btn-mobile" circle :icon="User" @click="$router.push('/profile')" />
+              
+              <el-button type="primary" class="btn-desktop" @click="$router.push('/article/edit')">写文章</el-button>
+              <el-button type="primary" class="btn-mobile" circle :icon="Edit" @click="$router.push('/article/edit')" />
+              
+              <el-button class="btn-desktop" @click="handleLogout">退出登录</el-button>
+              <el-button class="btn-mobile" circle :icon="SwitchButton" @click="handleLogout" />
+            </template>
+            <template v-else>
+              <el-button class="btn-desktop" @click="$router.push('/login')">登录</el-button>
+              <el-button class="btn-mobile" circle :icon="Lock" @click="$router.push('/login')" />
+              
+              <el-button type="primary" class="btn-desktop" @click="$router.push('/register')">注册</el-button>
+              <el-button type="primary" class="btn-mobile" circle :icon="Plus" @click="$router.push('/register')" />
+            </template>
           </div>
         </div>
       </el-header>
@@ -60,6 +74,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getArticleList, searchArticles } from '@/api/article'
+import { User, Edit, SwitchButton, Lock, Plus, Setting } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -146,11 +161,27 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header-content h1 {
   margin: 0;
   font-size: 24px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-desktop {
+  display: inline-flex;
+}
+
+.btn-mobile {
+  display: none;
 }
 
 .main-container {
@@ -192,6 +223,7 @@ onMounted(() => {
   color: #909399;
   font-size: 14px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .article-summary {
@@ -202,5 +234,65 @@ onMounted(() => {
 .el-pagination {
   margin-top: 30px;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .el-header {
+    padding: 10px 15px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .header-content h1 {
+    font-size: 20px;
+  }
+
+  .nav-buttons {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .btn-desktop {
+    display: none;
+  }
+
+  .btn-mobile {
+    display: inline-flex;
+  }
+
+  .main-container {
+    padding: 15px;
+  }
+
+  .article-title {
+    font-size: 18px;
+  }
+
+  .article-meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .el-pagination {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .article-title {
+    font-size: 16px;
+  }
+
+  .article-meta {
+    gap: 8px;
+    font-size: 11px;
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <el-container class="admin-layout">
-    <el-aside width="200px">
+    <el-aside width="200px" class="sidebar-desktop">
       <div class="logo">
         <h2>博客管理</h2>
       </div>
@@ -33,8 +33,34 @@
         </el-menu-item>
       </el-menu>
     </el-aside>
+    
     <el-container>
-      <el-header>
+      <el-header class="mobile-header">
+        <div class="mobile-nav">
+          <el-button circle size="small" @click="$router.push('/admin/dashboard')">
+            <el-icon><DataLine /></el-icon>
+          </el-button>
+          <el-button circle size="small" @click="$router.push('/admin/articles')">
+            <el-icon><Document /></el-icon>
+          </el-button>
+          <el-button circle size="small" @click="$router.push('/admin/comments')">
+            <el-icon><ChatDotRound /></el-icon>
+          </el-button>
+          <el-button circle size="small" @click="$router.push('/admin/users')">
+            <el-icon><User /></el-icon>
+          </el-button>
+        </div>
+        <div class="mobile-actions">
+          <el-button circle size="small" @click="$router.push('/articles')">
+            <el-icon><HomeFilled /></el-icon>
+          </el-button>
+          <el-button circle size="small" type="danger" v-if="userStore.token" @click="handleLogout">
+            <el-icon><SwitchButton /></el-icon>
+          </el-button>
+        </div>
+      </el-header>
+      
+      <el-header class="desktop-header">
         <div class="header-content">
           <span>欢迎，{{ userStore.token ? '管理员' : '访客' }}</span>
           <div class="header-actions">
@@ -43,6 +69,7 @@
           </div>
         </div>
       </el-header>
+      
       <el-main>
         <router-view />
       </el-main>
@@ -54,7 +81,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { DataLine, Document, ChatDotRound, User, Setting } from '@element-plus/icons-vue'
+import { DataLine, Document, ChatDotRound, User, Setting, HomeFilled, SwitchButton } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -73,7 +100,7 @@ const handleLogout = () => {
   height: 100vh;
 }
 
-.el-aside {
+.sidebar-desktop {
   background-color: #545c64;
   color: white;
 }
@@ -92,12 +119,31 @@ const handleLogout = () => {
   color: white;
 }
 
-.el-header {
+.desktop-header {
   background-color: white;
   border-bottom: 1px solid #e4e7ed;
   display: flex;
   align-items: center;
   padding: 0 20px;
+}
+
+.mobile-header {
+  background-color: #545c64;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  height: auto;
+}
+
+.mobile-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .header-content {
@@ -110,5 +156,23 @@ const handleLogout = () => {
 .el-main {
   background-color: #f0f2f5;
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-desktop {
+    display: none;
+  }
+
+  .desktop-header {
+    display: none;
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .el-main {
+    padding: 15px;
+  }
 }
 </style>

@@ -38,7 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .antMatchers("/api/user/register", "/api/user/login").permitAll()
                 .antMatchers("/api/test/**", "/api/simple/**", "/api/file/**", "/uploads/**").permitAll()
-                .antMatchers("/api/articles/**", "/api/comments/**", "/api/categories/**", "/api/tags/**").permitAll()
+                .antMatchers("/api/article/**", "/api/comment/**", "/api/categories/**", "/api/tags/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

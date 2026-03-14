@@ -2,7 +2,7 @@
   <div class="dashboard">
     <h2>仪表板</h2>
     <el-row :gutter="20">
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ stats.userCount }}</div>
@@ -11,7 +11,7 @@
           <el-icon class="stat-icon" :size="40" color="#409eff"><User /></el-icon>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ stats.articleCount }}</div>
@@ -20,7 +20,7 @@
           <el-icon class="stat-icon" :size="40" color="#67c23a"><Document /></el-icon>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ stats.publishedArticleCount }}</div>
@@ -29,7 +29,7 @@
           <el-icon class="stat-icon" :size="40" color="#e6a23c"><SuccessFilled /></el-icon>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ stats.commentCount }}</div>
@@ -102,5 +102,19 @@ onMounted(() => {
 
 .stat-icon {
   opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .stat-icon {
+    font-size: 30px;
+  }
 }
 </style>

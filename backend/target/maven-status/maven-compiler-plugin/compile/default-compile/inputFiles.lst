@@ -7,15 +7,18 @@ D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Article.jav
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Comment.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\AdminController.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Like.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\filter\JwtAuthenticationFilter.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\dto\LoginResponse.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\CommentServiceImpl.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\CommentService.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\exception\BusinessException.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\filter\CspFilter.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Category.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\CategoryMapper.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\common\R.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\TagMapper.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\UserMapper.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\filter\SecurityHeadersFilter.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\entity\Tag.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\CommentMapper.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\ArticleServiceImpl.java
@@ -24,6 +27,7 @@ D:\personal_blog\backend\src\main\java\com\blog\personal_blog\mapper\LikeMapper.
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\service\impl\TagServiceImpl.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\utils\XssUtil.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\config\CorsConfig.java
+D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\SimpleUploadController.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\utils\PasswordGenerator.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\controller\TestController.java
 D:\personal_blog\backend\src\main\java\com\blog\personal_blog\exception\GlobalExceptionHandler.java

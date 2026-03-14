@@ -3,12 +3,14 @@ package com.blog.personal_blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.blog.personal_blog.entity.Article;
 import com.blog.personal_blog.entity.Comment;
 import com.blog.personal_blog.entity.Like;
 import com.blog.personal_blog.entity.User;
 import com.blog.personal_blog.exception.BusinessException;
 import com.blog.personal_blog.mapper.CommentMapper;
 import com.blog.personal_blog.mapper.LikeMapper;
+import com.blog.personal_blog.service.ArticleService;
 import com.blog.personal_blog.service.CommentService;
 import com.blog.personal_blog.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
 
     private final UserService userService;
+    private final ArticleService articleService;
     private final LikeMapper likeMapper;
 
     @Override
@@ -68,7 +71,22 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         Page<Comment> commentPage = new Page<>(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByDesc(Comment::getCreatedAt);
-        return page(commentPage, wrapper);
+        
+        Page<Comment> resultPage = page(commentPage, wrapper);
+        
+        for (Comment comment : resultPage.getRecords()) {
+            User user = userService.getById(comment.getUserId());
+            if (user != null) {
+                comment.setUsername(user.getUsername());
+                comment.setAvatar(user.getAvatar());
+            }
+            Article article = articleService.getById(comment.getArticleId());
+            if (article != null) {
+                comment.setArticleTitle(article.getTitle());
+            }
+        }
+        
+        return resultPage;
     }
 
     @Override

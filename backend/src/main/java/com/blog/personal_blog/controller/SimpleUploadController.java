@@ -23,6 +23,7 @@ public class SimpleUploadController {
             return R.error("文件不能为空");
         }
 
+        String filePath = null;
         try {
             String originalFilename = file.getOriginalFilename();
             String extension = "";
@@ -38,10 +39,10 @@ public class SimpleUploadController {
                 uploadDir.mkdirs();
             }
 
-            String filePath = uploadDirPath + File.separator + newFilename;
+            filePath = uploadDirPath + File.separator + newFilename;
             System.out.println("保存文件到: " + filePath);
-            file.transferTo(new File(filePath));
-
+            
+            // 先进行所有准备工作，然后再保存文件
             String fileUrl = "/uploads/" + newFilename;
             System.out.println("文件URL: " + fileUrl);
 
@@ -49,11 +50,22 @@ public class SimpleUploadController {
             result.put("url", fileUrl);
             result.put("filename", originalFilename);
 
+            // 只有在所有准备工作完成后，才保存文件
+            file.transferTo(new File(filePath));
+
             System.out.println("=== 文件上传成功 ===");
             return R.success(result);
         } catch (Exception e) {
             System.out.println("=== 文件上传失败 ===");
             e.printStackTrace();
+            // 如果文件已经保存，删除它
+            if (filePath != null) {
+                File savedFile = new File(filePath);
+                if (savedFile.exists()) {
+                    System.out.println("删除已保存的文件: " + filePath);
+                    savedFile.delete();
+                }
+            }
             return R.error("文件上传失败：" + e.getMessage());
         }
     }

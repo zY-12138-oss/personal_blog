@@ -5,14 +5,19 @@
         <div class="header-content">
           <h1 @click="$router.push('/articles')" style="cursor: pointer">{{ isEdit ? '编辑文章' : '写文章' }}</h1>
           <div class="nav-buttons">
-            <el-button @click="$router.back()">取消</el-button>
-            <el-button type="primary" @click="handleSave('draft')">保存草稿</el-button>
-            <el-button type="success" @click="handleSave('published')">发布</el-button>
+            <el-button class="btn-desktop" @click="$router.back()">取消</el-button>
+            <el-button class="btn-mobile" circle :icon="Close" @click="$router.back()" />
+            
+            <el-button type="primary" class="btn-desktop" @click="handleSave('draft')">保存草稿</el-button>
+            <el-button type="primary" class="btn-mobile" circle :icon="Document" @click="handleSave('draft')" />
+            
+            <el-button type="success" class="btn-desktop" @click="handleSave('published')">发布</el-button>
+            <el-button type="success" class="btn-mobile" circle :icon="Upload" @click="handleSave('published')" />
           </div>
         </div>
       </el-header>
       <el-main>
-        <el-form :model="articleForm" label-width="80px">
+        <el-form :model="articleForm" label-width="80px" class="article-edit-form">
           <el-form-item label="标题">
             <el-input v-model="articleForm.title" placeholder="请输入文章标题" />
           </el-form-item>
@@ -30,9 +35,7 @@
                   accept="image/*"
                   style="display: none"
                 />
-                <el-button type="primary" :icon="Picture" @click="triggerImageUpload">上传图片</el-button>
-                <el-input v-model="imageUrl" placeholder="图片URL" style="width: 300px; margin-left: 10px" />
-                <el-button type="success" @click="insertImage" :icon="Check" style="margin-left: 10px">插入图片</el-button>
+                <el-button type="primary" :icon="Picture" @click="triggerImageUpload">插入图片</el-button>
               </div>
               <el-input v-model="articleForm.content" type="textarea" :rows="15" placeholder="请输入文章内容，支持Markdown格式" />
             </div>
@@ -47,7 +50,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Picture, Check } from '@element-plus/icons-vue'
+import { Picture, Check, Close, Document, Upload } from '@element-plus/icons-vue'
 import { createArticle, updateArticle, getArticle } from '@/api/article'
 import { uploadFile } from '@/api/file'
 
@@ -63,7 +66,6 @@ const articleForm = reactive({
   summary: ''
 })
 
-const imageUrl = ref('')
 const imageInput = ref(null)
 
 const loadArticle = async (id) => {
@@ -121,26 +123,16 @@ const handleImageSelect = async (event) => {
 
   try {
     const res = await uploadFile(file)
-    imageUrl.value = res.data.url
-    ElMessage.success('图片上传成功')
+    const imageUrl = res.data.url
+    const markdownImage = `![图片](${imageUrl})\n`
+    articleForm.content = articleForm.content + markdownImage
+    ElMessage.success('图片已插入')
   } catch (error) {
     console.error('图片上传失败', error)
     ElMessage.error('图片上传失败')
   }
 
   event.target.value = ''
-}
-
-const insertImage = () => {
-  if (!imageUrl.value) {
-    ElMessage.warning('请先上传图片或输入图片URL')
-    return
-  }
-  
-  const markdownImage = `![图片](${imageUrl.value})\n`
-  articleForm.content = articleForm.content + markdownImage
-  imageUrl.value = ''
-  ElMessage.success('图片已插入')
 }
 
 onMounted(() => {
@@ -166,6 +158,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header-content h1 {
@@ -174,10 +168,29 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-desktop {
+  display: inline-flex;
+}
+
+.btn-mobile {
+  display: none;
+}
+
 .el-main {
-  max-width: 900px;
+  max-width: 100%;
+  width: 95%;
   margin: 0 auto;
   padding: 20px;
+}
+
+.article-edit-form {
+  width: 100%;
 }
 
 .content-editor {
@@ -191,5 +204,73 @@ onMounted(() => {
   padding: 10px;
   background-color: #f5f7fa;
   border-radius: 4px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.image-url-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .el-header {
+    padding: 10px 15px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .header-content h1 {
+    font-size: 20px;
+  }
+
+  .nav-buttons {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .btn-desktop {
+    display: none;
+  }
+
+  .btn-mobile {
+    display: inline-flex;
+  }
+
+  .el-main {
+    padding: 15px;
+    max-width: 900px;
+  }
+
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .editor-toolbar .el-button {
+    width: 100%;
+  }
+
+  .image-url-input {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .el-main {
+    padding: 10px;
+  }
+
+  .article-edit-form :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
 }
 </style>

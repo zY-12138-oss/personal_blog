@@ -14,19 +14,19 @@
               <span>个人中心</span>
             </div>
           </template>
-          <el-form :model="userForm" label-width="80px">
-            <el-form-item label="用户名">
+          <el-form :model="userForm" class="profile-form" label-position="top">
+            <el-form-item label="用户名" class="form-item">
               <el-input v-model="userForm.username" disabled />
             </el-form-item>
-            <el-form-item label="邮箱">
+            <el-form-item label="邮箱" class="form-item">
               <el-input v-model="userForm.email" disabled />
             </el-form-item>
-            <el-form-item label="简介">
+            <el-form-item label="简介" class="form-item">
               <el-input v-model="userForm.bio" type="textarea" :rows="4" />
             </el-form-item>
-            <el-form-item label="头像">
+            <el-form-item label="头像" class="form-item">
               <div class="avatar-section">
-                <el-avatar :size="100" :src="userForm.avatar">
+                <el-avatar :size="100" :src="userForm.avatar" class="user-avatar">
                   {{ userForm.username ? userForm.username.charAt(0).toUpperCase() : 'U' }}
                 </el-avatar>
                 <div class="avatar-upload">
@@ -37,13 +37,13 @@
                     accept="image/*"
                     style="display: none"
                   />
-                  <el-button type="primary" :icon="Picture" @click="triggerAvatarUpload">上传头像</el-button>
-                  <el-input v-model="userForm.avatar" placeholder="或输入头像 URL" style="width: 300px; margin-top: 10px" />
+                  <el-button type="primary" :icon="Picture" @click="triggerAvatarUpload" class="upload-btn">上传头像</el-button>
+                  <el-input v-model="userForm.avatar" placeholder="或输入头像 URL" class="avatar-input" />
                 </div>
               </div>
             </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleUpdate">保存修改</el-button>
+            <el-form-item class="form-item">
+              <el-button type="primary" @click="handleUpdate" class="save-btn">保存修改</el-button>
             </el-form-item>
           </el-form>
         </el-card>
@@ -161,6 +161,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header-content h1 {
@@ -178,6 +180,32 @@ onMounted(() => {
 .card-header {
   font-weight: bold;
   font-size: 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.profile-form {
+  width: 100%;
+}
+
+.form-item {
+  margin-bottom: 22px;
+}
+
+.profile-form :deep(.el-form-item) {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-form :deep(.el-form-item__label) {
+  padding-right: 0;
+  margin-bottom: 8px;
+  width: 100%;
+  text-align: left;
+}
+
+.profile-form :deep(.el-form-item__content) {
+  width: 100%;
 }
 
 .avatar-section {
@@ -186,7 +214,105 @@ onMounted(() => {
   gap: 30px;
 }
 
+.user-avatar {
+  flex-shrink: 0;
+}
+
 .avatar-upload {
   flex: 1;
+}
+
+.upload-btn {
+  margin-bottom: 10px;
+}
+
+.avatar-input {
+  width: 100%;
+  max-width: 300px;
+}
+
+.save-btn {
+  width: 100%;
+  max-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .el-header {
+    padding: 10px 15px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .header-content h1 {
+    font-size: 20px;
+  }
+
+  .el-main {
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .profile-form :deep(.el-form-item) {
+    margin-bottom: 18px;
+  }
+
+  .profile-form :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
+
+  .avatar-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .avatar-upload {
+    width: 100%;
+    text-align: center;
+  }
+
+  .upload-btn {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .avatar-input {
+    max-width: 100%;
+  }
+
+  .save-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .el-main {
+    padding: 10px;
+  }
+
+  .profile-form :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+
+  .profile-form :deep(.el-form-item__label) {
+    font-size: 13px;
+  }
+
+  .user-avatar {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .avatar-section {
+    gap: 15px;
+  }
 }
 </style>

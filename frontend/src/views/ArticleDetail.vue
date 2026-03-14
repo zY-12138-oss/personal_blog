@@ -11,7 +11,12 @@
         <el-card class="article-card">
           <h1 class="article-title">{{ article.title }}</h1>
           <div class="article-meta">
-            <span>作者: {{ article.authorName }}</span>
+            <div class="author-section" @click="showAuthorInfo">
+              <el-avatar :size="40" :src="article.authorAvatar" style="cursor: pointer;">
+                {{ article.authorName ? article.authorName.charAt(0) : 'U' }}
+              </el-avatar>
+              <span class="author-name" style="cursor: pointer;">{{ article.authorName }}</span>
+            </div>
             <span>浏览: {{ article.views }}</span>
             <span class="like-section">
               <el-button 
@@ -93,6 +98,27 @@
         <el-empty description="加载中..." />
       </el-main>
     </el-container>
+
+    <el-dialog v-model="authorDialogVisible" title="作者信息" width="500px">
+      <div v-if="authorInfo" class="author-info-dialog">
+        <div class="author-avatar-section">
+          <el-avatar :size="100" :src="authorInfo.avatar">
+            {{ authorInfo.username ? authorInfo.username.charAt(0) : 'U' }}
+          </el-avatar>
+        </div>
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="用户名">
+            {{ authorInfo.username }}
+          </el-descriptions-item>
+          <el-descriptions-item label="邮箱">
+            {{ authorInfo.email }}
+          </el-descriptions-item>
+          <el-descriptions-item label="简介">
+            {{ authorInfo.bio || '暂无简介' }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -102,6 +128,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getArticle, likeArticle, unlikeArticle, hasLikedArticle } from '@/api/article'
 import { getCommentsByArticle, createComment, deleteComment, likeComment, unlikeComment, hasLikedComment } from '@/api/comment'
+import { getUserInfo } from '@/api/user'
 import { useUserStore } from '@/stores/user'
 import { jwtDecode } from 'jwt-decode'
 
@@ -114,6 +141,8 @@ const newComment = ref('')
 const submitting = ref(false)
 const hasLiked = ref(false)
 const commentLikedMap = ref(new Map())
+const authorDialogVisible = ref(false)
+const authorInfo = ref(null)
 
 const currentUserId = computed(() => {
   if (userStore.token) {
@@ -274,6 +303,20 @@ const renderContent = (content) => {
   return html
 }
 
+const showAuthorInfo = async () => {
+  if (!article.value || !article.value.authorId) {
+    return
+  }
+  try {
+    const res = await getUserInfo(article.value.authorId)
+    authorInfo.value = res.data
+    authorDialogVisible.value = true
+  } catch (error) {
+    console.error('获取作者信息失败', error)
+    ElMessage.error('获取作者信息失败')
+  }
+}
+
 onMounted(() => {
   loadArticle()
   loadComments()
@@ -294,6 +337,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header-content h1 {
@@ -327,6 +372,26 @@ onMounted(() => {
   padding-bottom: 20px;
   border-bottom: 1px solid #ebeef5;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.author-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.author-name {
+  font-weight: bold;
+  color: #409eff;
+}
+
+.author-info-dialog {
+  text-align: center;
+}
+
+.author-avatar-section {
+  margin-bottom: 20px;
 }
 
 .like-section {
@@ -387,6 +452,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .username {
@@ -409,10 +475,70 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .likes {
   color: #909399;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .el-header {
+    padding: 10px 15px;
+  }
+
+  .header-content h1 {
+    font-size: 20px;
+  }
+
+  .el-main {
+    padding: 15px;
+  }
+
+  .article-title {
+    font-size: 22px;
+  }
+
+  .article-meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .author-section {
+    width: 100%;
+  }
+
+  .article-content {
+    font-size: 15px;
+  }
+
+  .comment-user {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .article-title {
+    font-size: 20px;
+  }
+
+  .article-meta {
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .article-content {
+    font-size: 14px;
+  }
+
+  .comment-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
