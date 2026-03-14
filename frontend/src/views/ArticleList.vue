@@ -49,21 +49,6 @@
               @current-change="handlePageChange"
             />
           </div>
-
-          <div class="sidebar">
-            <el-card class="hot-articles-card">
-              <template #header>
-                <div class="card-header">
-                  <span>🔥 热门文章</span>
-                </div>
-              </template>
-              <div v-for="(article, index) in hotArticles" :key="article.id" class="hot-article-item" @click="viewArticle(article.id)">
-                <span class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
-                <span class="hot-title">{{ article.title }}</span>
-              </div>
-              <el-empty v-if="hotArticles.length === 0" description="暂无热门文章" />
-            </el-card>
-          </div>
         </div>
       </el-main>
     </el-container>
@@ -74,13 +59,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getArticleList, searchArticles, getHotArticles } from '@/api/article'
+import { getArticleList, searchArticles } from '@/api/article'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const articles = ref([])
-const hotArticles = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -130,15 +114,6 @@ const handlePageChange = () => {
   }
 }
 
-const loadHotArticles = async () => {
-  try {
-    const res = await getHotArticles(10)
-    hotArticles.value = res.data
-  } catch (error) {
-    console.error('加载热门文章失败', error)
-  }
-}
-
 const viewArticle = (id) => {
   router.push(`/article/${id}`)
 }
@@ -154,7 +129,6 @@ const formatDate = (dateStr) => {
 
 onMounted(() => {
   loadArticles()
-  loadHotArticles()
 })
 </script>
 
@@ -184,26 +158,17 @@ onMounted(() => {
 }
 
 .content-wrapper {
-  display: flex;
-  gap: 20px;
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
 .main-content {
-  flex: 1;
-}
-
-.sidebar {
-  width: 300px;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .search-card {
   margin-bottom: 20px;
 }
-
-
 
 .article-card {
   margin-bottom: 20px;
@@ -232,71 +197,6 @@ onMounted(() => {
 .article-summary {
   color: #606266;
   margin: 0;
-}
-
-.hot-articles-card {
-  position: sticky;
-  top: 20px;
-}
-
-.card-header {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.hot-article-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s;
-}
-
-.hot-article-item:hover {
-  background-color: #f5f7fa;
-}
-
-.hot-article-item:last-child {
-  border-bottom: none;
-}
-
-.hot-rank {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: bold;
-  color: white;
-  flex-shrink: 0;
-}
-
-.rank-1 {
-  background-color: #ff6b6b;
-}
-
-.rank-2 {
-  background-color: #ffa94d;
-}
-
-.rank-3 {
-  background-color: #ffd43b;
-}
-
-.hot-rank:not(.rank-1):not(.rank-2):not(.rank-3) {
-  background-color: #909399;
-}
-
-.hot-title {
-  font-size: 14px;
-  color: #303133;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .el-pagination {
